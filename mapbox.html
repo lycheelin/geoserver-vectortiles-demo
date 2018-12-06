@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>demo-mapbox</title>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.css' rel='stylesheet' />
+    <style rel="stylesheet">
+        body,
+        html,
+        #map {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='map'></div>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.js'></script>
+    <script>
+        // mapboxgl.accessToken = 'your.mapbox.accessToken';
+        // 如果 style 使用mapbox自带样式，则需要 accessToken。例如 mapbox://styles/mapbox/dark-v9
+        // 下面我们使用一个简单的自定义style
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: getMaboxStyle(), //mapbox://styles/mapbox/dark-v9
+            zoom: 13,
+            center: [114.05596119898604, 22.532226686716587],
+            pitch: 45,
+            bearing: -20
+        });
+
+        //参数设置
+        var baseUrl = 'http://localhost:8088';
+        var workspace = 'traffic';
+        var layerName = 'test_road';
+        var epsg = '3857';
+
+        var vectorUrl = baseUrl + '/geoserver/gwc/service/tms/1.0.0/' + workspace + ":" + layerName + '@EPSG%3A' + epsg +
+            '@pbf/{z}/{x}/{y}.pbf';
+
+        var trafficStateLayer = getLayerWithStyle('road-layer', 'speed'); // 'road-layer' 是layer id，名字随意取，保证唯一性即可
+
+        map.on('load', function () {
+            map.addLayer(trafficStateLayer);
+        });
+
+        function getLayerWithStyle(layerId, fieldName) {
+            return {
+                "id": layerId,
+                "type": "line",
+                "source": {
+                    "scheme": 'tms',
+                    "type": 'vector',
+                    "tiles": [vectorUrl]
+                },
+                "source-layer": layerName, //layer_name,
+                "layout": {
+                    "line-join": "round",
+                    "line-cap": "round"
+                },
+                "paint": {
+                    "line-color": getLineStyle(fieldName),
+                    "line-width": 3,
+                    'line-opacity': 0.9
+                },
+                'minzoom': 8
+            }
+        }
+
+        function getLineStyle(fieldName) {
+            return {
+                property: fieldName,
+                type: "interval",
+                stops: [
+                    [-1.0, 'transparent'],
+                    [0.0, "#800026"],
+                    [5.0001, "#E31A1C"],
+                    [15.0001, "#FEB24C"],
+                    [30.0001, "#00ff00"]
+                ]
+            }
+        }
+
+        function getMaboxStyle() {
+            return {
+                "version": 8,
+                "name": "Raster Tiles",
+                "sources": {
+                    "cartocdn": {
+                        "type": "raster",
+                        "tiles": [
+                            "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+                            "https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+                            "https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
+                        ],
+                        "tileSize": 256
+                    }
+                },
+                "layers": [{
+                    "id": "base-layer",
+                    "type": "raster",
+                    "source": "cartocdn",
+                    "paint": {
+                        "raster-fade-duration": 100
+                    }
+                }]
+            }
+        }
+    </script>
+
+
+</body>
+
+</html>
