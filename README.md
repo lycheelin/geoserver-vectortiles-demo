@@ -17,7 +17,7 @@ var vectorLayerUrl = "http://localhost:8088/geoserver/gwc/service/wmts?"+
 
 ```js
 vectorLayerUrl = "http://localhost:8088/geoserver/gwc/service/tms/1.0.0/"+
-"traffic:test_road@EPSG%3A900913@pbf/{z}/{x}/{-y}.pbf";
+"traffic:test_road@EPSG%3A900913@pbf/{z}/{x}/{y}.pbf";
 ```
 
 ## 加载方式
@@ -25,7 +25,18 @@ vectorLayerUrl = "http://localhost:8088/geoserver/gwc/service/tms/1.0.0/"+
 + leaflet
 
 ```js
-L.vectorGrid.protobuf(vectorLayerUrl, getVectorOptions('speed')).addTo(map);
+L.vectorGrid.protobuf(vectorLayerUrl, {
+                layerURL: vectorLayerUrl,
+                rendererFactory: L.canvas.tile,
+                vectorTileLayerStyles: getVectorStyles("test_road", "speed"),
+                // tms: true, // 如果使用 TMS，则必须开启
+            }).addTo(map);
+```
+
+`注意：如果使用TMS，则需要设置属性：`
+
+```js
+tms: true
 ```
 
 + mapbox
@@ -35,7 +46,7 @@ var vectorLayer = {
                 "id": 'road-layer',
                 "type": "line",
                 "source": {
-                    // "scheme": 'tms', // 如果使用 TMS，则开启
+                    // "scheme": 'tms', // 如果使用 TMS，则必须开启
                     "type": 'vector',
                     "tiles": [vectorLayerUrl]
                 },
@@ -54,7 +65,7 @@ var vectorLayer = {
 map.addLayer(vectorLayer);
 ```
 
-`注意：如果使用TMS，则必须设置属性：`
+`注意：如果使用TMS，则需要设置属性：`
 
 ```js
 "scheme": 'tms'

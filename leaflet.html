@@ -43,7 +43,7 @@
             "&TILECOL={x}&TILEROW={y}";
 
         // 使用 TMS 的方式
-        // vectorLayerUrl = baseUrl + '/geoserver/gwc/service/tms/1.0.0/' + workspace + ":" + layerName + "@EPSG%3A" + epsg + "@pbf/{z}/{x}/{-y}.pbf";
+        // vectorLayerUrl = baseUrl + '/geoserver/gwc/service/tms/1.0.0/' + workspace + ":" + layerName + "@EPSG%3A" + epsg + "@pbf/{z}/{x}/{y}.pbf";
 
         L.vectorGrid.protobuf(vectorLayerUrl, getVectorOptions('speed')).addTo(map);
 
@@ -52,7 +52,7 @@
                 layerURL: vectorLayerUrl,
                 rendererFactory: L.canvas.tile,
                 vectorTileLayerStyles: getVectorStyles(layerName, fieldName),
-                tiled: true
+                // tms: true, // 如果是 TMS 方式，则必须开启
             };
         }
 
