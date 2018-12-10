@@ -37,13 +37,18 @@
         var baseUrl = 'http://localhost:8088';
         var workspace = 'traffic';
         var layerName = 'test_road';
-        var epsg = '3857';
+        var epsg = '900913';
+        var format = 'application/x-protobuf;type=mapbox-vector'; // application/vnd.mapbox-vector-tile
 
-        var vectorUrl = baseUrl + '/geoserver/gwc/service/tms/1.0.0/' + workspace + ":" + layerName + '@EPSG%3A' + epsg +
-            '@pbf/{z}/{x}/{y}.pbf';
+        var vectorLayerUrl = baseUrl + "/geoserver/gwc/service/wmts?REQUEST=GetTile&SERVICE=WMTS" +
+            "&VERSION=1.0.0&LAYER=" + workspace + ":" + layerName + "&STYLE=&TILEMATRIX=EPSG:" + epsg + ":{z}" +
+            "&TILEMATRIXSET=EPSG:" + epsg + "&FORMAT=" + format + "&TILECOL={x}&TILEROW={y}";
+
+        // 使用 TMS 的方式
+        // vectorLayerUrl = baseUrl + '/geoserver/gwc/service/tms/1.0.0/' + workspace + ":" + layerName +
+        // '@EPSG%3A' + epsg + '@pbf/{z}/{x}/{y}.pbf';
 
         var trafficStateLayer = getLayerWithStyle('road-layer', 'speed'); // 'road-layer' 是layer id，名字随意取，保证唯一性即可
-
         map.on('load', function () {
             map.addLayer(trafficStateLayer);
         });
@@ -53,9 +58,9 @@
                 "id": layerId,
                 "type": "line",
                 "source": {
-                    "scheme": 'tms',
+                    // "scheme": 'tms', // 如果使用 TMS，则开启
                     "type": 'vector',
-                    "tiles": [vectorUrl]
+                    "tiles": [vectorLayerUrl]
                 },
                 "source-layer": layerName, //layer_name,
                 "layout": {
@@ -97,7 +102,6 @@
                             "https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
                             "https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
                         ],
-                        "tileSize": 256
                     }
                 },
                 "layers": [{
